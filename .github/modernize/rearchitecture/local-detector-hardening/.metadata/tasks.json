@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Bounded local hardening, verification, and security work for the AI Phishing & Deepfake Detector Prototype. Cloud deployment remains gated and is not included.",
+  "tasks": [
+    {
+      "type": "transform",
+      "id": "001-transform-local-detector-safety",
+      "description": "Harden local detector inputs, privacy, and uncertainty while preserving the current interface",
+      "reason": "The detector must remain useful as a local triage tool while protecting uploaded private content and avoiding unsupported conclusions.",
+      "requirements": "Preserve the current Streamlit tabs, cybersecurity styling, and user-visible behavior. Cover phishing email/text, URLs/domains, sender impersonation, logo similarity, and image/video/audio analysis. Validate uploaded type, size, and content; reject unsupported or oversized inputs clearly using acceptance limits of text 1 MB, image 10 MB, audio 20 MB, and supported video 50 MB. Preserve uploaded bytes and compare SHA-256 before and after analysis. Do not retain private uploads; clean temporary processing artifacts and prevent sensitive content from entering logs or reports. Reports must include result, risk level, indicators, uncertainty, processing time, and recommended actions, distinguishing confirmed findings, suspicious results, and inconclusive results. Evaluate confidence calibration only on appropriately licensed held-out labeled data; if evidence is insufficient, label estimates uncalibrated/uncertain. Preserve current UI style and verify WCAG 2.2 AA intent, responsive layouts, and Chrome/Edge on Windows. Do not make accuracy or forensic claims.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "002-transform-local-chat-boundaries",
+      "description": "Preserve and verify the local encrypted chat while documenting identity and key-verification blockers",
+      "reason": "The local chat must demonstrate that its relay cannot read plaintext without being represented as a production-authenticated messenger.",
+      "requirements": "Preserve the current Flask-SocketIO user-visible behavior, protocol, UI style, E2EE message/file behavior, and documented 10 MiB transfer limit unless compatibility tests justify a change. Add or retain repeatable evidence that the relay only handles ciphertext and cannot decrypt message plaintext, and verify intended-recipient decryption and tamper rejection. Keep the service loopback-only and do not expose it publicly. Persistent registration/authentication and verified public-key identity are blocked because no database-free identity/key design or authorized persistent store has been selected, and no identity provider is selected. Do not silently relax authentication, invent credentials/provider choices, or claim those persistent identity requirements are delivered. Document the decisions required before any public deployment.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      },
+      "dependencies": [
+        "001-transform-local-detector-safety"
+      ]
+    },
+    {
+      "type": "transform",
+      "id": "003-transform-local-verification-evidence",
+      "description": "Run repeatable local regression, performance, capacity, and licensed-dataset evaluation",
+      "reason": "A classroom-ready local system needs reproducible evidence for preserved behavior, stated limits, latency, and model uncertainty.",
+      "requirements": "Preserve and extend existing detector, chat relay, and browser crypto tests. Run tests on the specified Windows 11 / 8 GB target and record test commands, environment, outcomes, and screenshots. Measure against targets of text 1 MB within 5 seconds, image 10 MB within 15 seconds, audio 20 MB within 30 seconds, supported video 50 MB within 60 seconds, and report generation within 5 seconds after analysis; distinguish model cold-start from warm analysis and report failures or actual limits rather than implying success. Measure future cloud capacity for at least five simultaneous users only after cloud blockers are resolved; do not deploy or expose services as part of this task. Evaluate with appropriately licensed labeled samples and report dataset/license/split and TP, TN, FP, FN, precision, recall, F1, and accuracy where applicable. Do not invent results or use model-card scores as project metrics; assess calibration on held-out data and state when evidence is insufficient.",
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      },
+      "dependencies": [
+        "001-transform-local-detector-safety",
+        "002-transform-local-chat-boundaries"
+      ]
+    },
+    {
+      "type": "security",
+      "id": "004-security-dependency-and-readiness-review",
+      "description": "Review dependencies and local security controls without enabling public deployment",
+      "reason": "The local prototype needs a current dependency security check, and future internet exposure must remain blocked until identity and deployment risks are addressed.",
+      "requirements": "Scan project dependencies for known CVEs and remediate identified vulnerabilities to patched compatible versions; document any major-version breaking-change risk and rerun affected tests. Review local upload validation, ephemeral-file handling, secret/log/report privacy, loopback-only binding, and the evidence that the chat relay cannot read plaintext. Record the unresolved conflict between no database and persistent registration/key verification, the unselected identity provider, and the unselected cloud target as release blockers. Do not generate production deployment configuration, expose services publicly, or claim production security approval.",
+      "skills": [
+        {
+          "name": "cve-remediation",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "dependencies": [
+        "003-transform-local-verification-evidence"
+      ]
+    }
+  ],
+  "metadata": {
+    "planName": "local-detector-hardening",
+    "projectName": "AI Phishing & Deepfake Detector Prototype",
+    "language": "python",
+    "createdAt": "2026-11-06T23:36:54+02:00",
+    "version": "1.0"
+  }
+}

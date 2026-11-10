@@ -1,0 +1,161 @@
+{
+  "benchmark_info": {
+    "date": "2026-11-07T06:47:05.463568Z",
+    "tool": "AI Phishing & Deepfake Detector",
+    "version": "1.0-prototype"
+  },
+  "email_tests": [
+    {
+      "iterations": 5,
+      "avg_time_s": 0.00927,
+      "avg_analysis_time_s": 0.006127,
+      "avg_report_generation_time_s": 0.003137,
+      "avg_total_processing_time_s": 0.00927,
+      "min_time_s": 0.003231,
+      "max_time_s": 0.032644,
+      "risk_score": 47
+    },
+    {
+      "iterations": 5,
+      "avg_time_s": 0.002354,
+      "avg_analysis_time_s": 0.000471,
+      "avg_report_generation_time_s": 0.001878,
+      "avg_total_processing_time_s": 0.002354,
+      "min_time_s": 0.001954,
+      "max_time_s": 0.002923,
+      "risk_score": 0
+    }
+  ],
+  "media_tests": [
+    {
+      "filename": "test_sample.png",
+      "size_bytes": 588,
+      "size_mib": 0.0006,
+      "iterations": 3,
+      "avg_time_s": 2.854619,
+      "avg_analysis_time_s": 2.801819,
+      "avg_report_generation_time_s": 0.00364,
+      "avg_total_processing_time_s": 2.854619,
+      "min_time_s": 0.11243,
+      "max_time_s": 8.324442,
+      "media_type": "image",
+      "sha256": "8056b4fc446b3312fc20623c914bb91efc02abf2615c73b3ab40d915f50cc80b",
+      "integrity_verified": true,
+      "inspection_error": null
+    },
+    {
+      "filename": "benchmark.png",
+      "size_bytes": 1539248,
+      "size_mib": 1.4679,
+      "iterations": 3,
+      "avg_time_s": 0.428021,
+      "avg_analysis_time_s": 0.406071,
+      "avg_report_generation_time_s": 0.004796,
+      "avg_total_processing_time_s": 0.428021,
+      "min_time_s": 0.410411,
+      "max_time_s": 0.44866,
+      "media_type": "image",
+      "sha256": "f1d98575e553c790fe58ba53aa38ef4a41ac3c2fb264b4780c0f377f894eb018",
+      "integrity_verified": true,
+      "inspection_error": null
+    },
+    {
+      "filename": "capacity.png",
+      "size_bytes": 5900237,
+      "size_mib": 5.6269,
+      "iterations": 3,
+      "avg_time_s": 1.08882,
+      "avg_analysis_time_s": 1.040119,
+      "avg_report_generation_time_s": 0.003569,
+      "avg_total_processing_time_s": 1.08882,
+      "min_time_s": 0.956396,
+      "max_time_s": 1.177102,
+      "media_type": "image",
+      "sha256": "5f08e0f06c3dc493a63f087b369bedb5c33fbdab76c02754e174e8ea098ce064",
+      "integrity_verified": true,
+      "inspection_error": null
+    },
+    {
+      "filename": "benchmark.wav",
+      "size_bytes": 1048576,
+      "size_mib": 1.0,
+      "iterations": 3,
+      "avg_time_s": 0.039353,
+      "avg_analysis_time_s": 0.015747,
+      "avg_report_generation_time_s": 0.004737,
+      "avg_total_processing_time_s": 0.039353,
+      "min_time_s": 0.020904,
+      "max_time_s": 0.069743,
+      "media_type": "audio",
+      "sha256": "6b2d3ce5a57de25c4fe2b3918c50194fee025e00e7dce2ce1c9ffa50256c3cfe",
+      "integrity_verified": true,
+      "inspection_error": null
+    },
+    {
+      "filename": "benchmark.avi",
+      "size_bytes": 1143904,
+      "size_mib": 1.0909,
+      "iterations": 3,
+      "avg_time_s": 1.663139,
+      "avg_analysis_time_s": 1.655972,
+      "avg_report_generation_time_s": 0.00356,
+      "avg_total_processing_time_s": 1.663139,
+      "min_time_s": 1.580387,
+      "max_time_s": 1.729543,
+      "media_type": "video",
+      "sha256": "14edf3513e4191f0900876e8b1dc2d14323ded6cbf41603647383dab4666c8e9",
+      "integrity_verified": true,
+      "inspection_error": null
+    }
+  ],
+  "capacity_tests": [
+    {
+      "filename": "capacity.png",
+      "size_bytes": 1539248,
+      "size_mib": 1.4679,
+      "iterations": 3,
+      "media_type": "image",
+      "avg_analysis_time_s": 0.364185,
+      "avg_report_generation_time_s": 0.005176,
+      "avg_total_processing_time_s": 0.384171,
+      "processed_without_error": true,
+      "integrity_verified": true
+    },
+    {
+      "filename": "capacity.png",
+      "size_bytes": 5900237,
+      "size_mib": 5.6269,
+      "iterations": 3,
+      "media_type": "image",
+      "avg_analysis_time_s": 0.959713,
+      "avg_report_generation_time_s": 0.003342,
+      "avg_total_processing_time_s": 1.012684,
+      "processed_without_error": true,
+      "integrity_verified": true
+    },
+    {
+      "filename": "capacity.wav",
+      "size_bytes": 5242880,
+      "size_mib": 5.0,
+      "iterations": 3,
+      "media_type": "audio",
+      "avg_analysis_time_s": 0.060683,
+      "avg_report_generation_time_s": 0.003296,
+      "avg_total_processing_time_s": 0.065648,
+      "processed_without_error": true,
+      "integrity_verified": true
+    },
+    {
+      "filename": "capacity.avi",
+      "size_bytes": 5784056,
+      "size_mib": 5.5161,
+      "iterations": 3,
+      "media_type": "video",
+      "avg_analysis_time_s": 2.140397,
+      "avg_report_generation_time_s": 0.004966,
+      "avg_total_processing_time_s": 2.152559,
+      "processed_without_error": true,
+      "integrity_verified": true
+    }
+  ]
+}

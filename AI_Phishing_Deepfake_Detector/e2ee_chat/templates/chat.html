@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E2EE Chat Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body data-detector-url="{{ detector_url }}">
+    <div class="container">
+        <header>
+            <h1>LOCAL-FIRST THREAT ANALYSIS</h1>
+            <p class="subtitle">Sign in once, then choose encrypted chat or phishing and deepfake detection.</p>
+        </header>
+
+        <div class="setup-panel" id="setupPanel">
+            <h2>Your local account</h2>
+            <label for="authMode">Account action</label>
+            <select id="authMode">
+                <option value="create">Create a new account</option>
+                <option value="login">Sign in to an existing account</option>
+            </select>
+            <label for="username">Username</label>
+            <input type="text" id="username" autocomplete="username" maxlength="32" placeholder="3-32 letters, numbers, . _ -" />
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="new-password" minlength="12" maxlength="1024" placeholder="At least 12 characters" />
+            <button id="generateKeysBtn">Prepare Secure Account</button>
+            <div id="keyStatus" class="status"></div>
+            <button id="registerBtn" disabled>Create Account and Sign In</button>
+            <small>
+                Accounts and public keys are stored in the local SQLite database. Passwords are stored as scrypt hashes.
+                Private keys stay in this browser profile as non-exportable keys for the encrypted chat; clearing browser
+                data loses chat access. There is no password or key recovery. Use only on this trusted machine.
+            </small>
+        </div>
+
+        <div class="setup-panel choice-panel" id="choicePanel" style="display:none;">
+            <h2>Choose what you want to do</h2>
+            <p class="subtitle">Signed in as <strong id="choiceUsername"></strong></p>
+            <button id="openChatBtn" type="button">Open End-to-End Encrypted Chat</button>
+            <button id="openDetectorBtn" type="button">Open Phishing &amp; Deepfake Detector</button>
+            <small>The detector opens in a new tab. Your local sign-in is valid for 12 hours or until you sign out.</small>
+        </div>
+
+        <div class="chat-panel" id="chatPanel" style="display:none;">
+            <div class="sidebar">
+                <h3>Online Users</h3>
+                <div id="userList" class="user-list"></div>
+                <div class="my-info">
+                    <strong>You:</strong> <span id="myUsername"></span><br>
+                    <small>Signed in; private keys remain local</small>
+                    <p>Share your public-key fingerprint with peers through an independent trusted channel.</p>
+                    <code id="myFingerprint" aria-label="Your public-key fingerprint"></code>
+                    <button id="backToChoicesBtn" type="button">Back to app choices</button>
+                    <button id="logoutBtn" type="button">Sign Out</button>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <h3 id="chatWith">Select a user to chat</h3>
+                    <span id="encryptionStatus" class="enc-badge">🔐 Encrypted and signed</span>
+                </div>
+                <section id="peerVerification" class="peer-verification" style="display:none;" aria-live="polite">
+                    <strong>Peer key fingerprint — <span id="peerFingerprintIdentity"></span></strong>
+                    <code id="peerFingerprint"></code>
+                    <p>Compare this complete fingerprint with the person through a separate trusted channel before trusting the key.</p>
+                    <label class="fingerprint-confirmation">
+                        <input type="checkbox" id="peerFingerprintConfirmed" />
+                        I independently checked this fingerprint with the account owner.
+                    </label>
+                    <button id="verifyPeerBtn" type="button" disabled>Trust fingerprint after checking</button>
+                    <div id="peerTrustStatus" class="status" role="status"></div>
+                </section>
+                <div id="chatStatus" class="status error" role="alert"></div>
+                <div id="messages" class="messages"></div>
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type encrypted message..." disabled />
+                    <button id="sendBtn" disabled>Send</button>
+                    <input type="file" id="fileInput" disabled />
+                    <button id="sendFileBtn" disabled>Send File</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

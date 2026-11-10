@@ -1,0 +1,21 @@
+id,label,source,sender,subject,body
+BENIGN-01,benign,synthetic,Alex Morgan <alex@example.org>,Project check-in,The project check-in is scheduled for Thursday at 10 AM. Please bring your progress notes.
+BENIGN-02,benign,synthetic,Library Desk <library@example.org>,Book return reminder,The book you borrowed is due next week. You can renew it through the library catalogue.
+BENIGN-03,benign,synthetic,Human Resources <hr@example.org>,Annual leave calendar,Please review the annual leave calendar at next week's staff meeting.
+BENIGN-04,benign,synthetic,Billing Team <billing@example.org>,Monthly statement,Your monthly statement is available in the usual account portal. No action is required.
+BENIGN-05,benign,synthetic,Security Notices <notices@example.org>,Password safety reminder,Never share your password or one-time code. Support staff will never ask you to send them by email.
+BENIGN-06,benign,synthetic,Delivery Updates <delivery@example.org>,Package status,Your package is out for delivery today. Check its status in the official delivery app if you wish.
+BENIGN-07,benign,synthetic,Account Services <accounts@example.org>,Sign-in notice,"A new sign-in was detected. If this was you, no action is needed. Contact support using the number in your directory if you have questions."
+BENIGN-08,benign,synthetic,Payroll Team <payroll@example.org>,Friday payroll,Payroll will be processed on Friday as scheduled. Contact HR through the staff directory with questions.
+BENIGN-09,benign,synthetic,Rent Services <rent@example.org>,Payment receipt,The scheduled rent payment was processed successfully today. Your receipt is available in your account portal.
+BENIGN-10,benign,synthetic,Office of the CEO <office@example.org>,Quarterly update,The CEO will host a quarterly update and answer questions next Tuesday.
+PHISHING-01,phishing,synthetic,Account Team <notice@example.test>,Urgent: account suspended,Verify your account and password immediately. Click here to restore access.
+PHISHING-02,phishing,synthetic,Finance Director <finance@example.test>,Payment deadline,The finance director requests a wire transfer by midnight. Keep this confidential.
+PHISHING-03,phishing,synthetic,Account Security <security@example.test>,Unusual sign-in,Approve the sign-in in your authenticator app now. Reply with your verification code immediately.
+PHISHING-04,phishing,synthetic,Billing Desk <billing@example.test>,Past-due invoice,Payment overdue. Open the attachment and click here to confirm the bank account for a wire transfer.
+PHISHING-05,phishing,synthetic,Account Team <account@example.test>,QR code verification,Scan the QR code to re-verify your account and password; this is the final notice.
+PHISHING-06,phishing,synthetic,Chief Executive <ceo@gmail.com>,Urgent finance request,Finance needs a gift card payment today. Do not tell anyone.
+PHISHING-07,phishing,synthetic,Delivery Desk <delivery@example.test>,Missed delivery,Failed delivery. Download now and enter your password to reschedule within 2 hours.
+PHISHING-08,phishing,synthetic,Rewards Team <rewards@example.test>,Congratulations,You are a winner; click here to claim your reward. Limited time.
+PHISHING-09,phishing,synthetic,Payroll Team <payroll@example.test>,Update payroll details,Update your bank details immediately; confirm your identity to avoid legal action.
+PHISHING-10,phishing,synthetic,IT Support <helpdesk@example.test>,Security process exception,"Bypass the usual process, copy and paste the link below, and provide your password and OTP immediately."

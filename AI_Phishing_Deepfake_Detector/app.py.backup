@@ -1,0 +1,274 @@
+import streamlit as st
+import hashlib
+import io
+import re
+import time
+import json
+import mimetypes
+from datetime import datetime, timezone
+from urllib.parse import urlparse
+
+st.set_page_config(page_title="AI Phishing & Deepfake Detector", page_icon="🛡️", layout="wide")
+
+st.title("🛡️ AI Phishing & Deepfake Detector")
+st.caption("Course project prototype • Email screening + media file inspection + downloadable reports")
+
+st.warning(
+    "Prototype limitation: email checks currently use transparent indicators and rules. "
+    "Image/video/audio inspection records technical properties but does NOT prove a file is a deepfake. "
+    "A trained and validated deepfake model must be integrated before presenting media results as AI detections."
+)
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+def scan_email(text: str, sender: str = "", subject: str = ""):
+    content = f"{subject}\n{sender}\n{text}".strip()
+    lower = content.lower()
+    findings = []
+    score = 0
+
+    checks = [
+        (r"\b(urgent|immediately|act now|final warning|account suspended|verify your account)\b",
+         "Urgency or account-pressure wording", 15),
+        (r"\b(password|login credentials|one-time password|otp|verification code)\b",
+         "Requests or mentions sensitive authentication information", 20),
+        (r"\b(wire transfer|bank account|payment|gift card|crypto|change of bank details)\b",
+         "Payment or financial-action wording", 15),
+        (r"\b(click here|open the attachment|enable macros|download now)\b",
+         "Call to click, download, or open content", 10),
+        (r"\b(prize|winner|claim your reward|you have won)\b",
+         "Prize or reward lure", 10),
+        (r"\b(ceo|director|manager|lecturer|administrator)\b",
+         "Authority/personnel impersonation may be relevant; verify independently", 5),
+    ]
+    for pattern, label, points in checks:
+        if re.search(pattern, lower):
+            findings.append({"indicator": label, "points": points})
+            score += points
+
+    urls = re.findall(r"(?:https?://|www\.)[^\s<>\])}\"']+", content, flags=re.I)
+    for raw in urls:
+        cleaned = raw.rstrip(".,;:")
+        parsed = urlparse(cleaned if cleaned.startswith("http") else "http://" + cleaned)
+        host = parsed.netloc.lower()
+        if host:
+            if re.search(r"\d{1,3}(?:\.\d{1,3}){3}", host):
+                findings.append({"indicator": f"URL uses an IP address: {cleaned}", "points": 15})
+                score += 15
+            if "xn--" in host:
+                findings.append({"indicator": f"URL contains an internationalized/punycode domain: {cleaned}", "points": 15})
+                score += 15
+            if len(host) > 35:
+                findings.append({"indicator": f"Unusually long URL host: {host}", "points": 5})
+                score += 5
+
+    if sender and re.search(r"(gmail|outlook|yahoo)\.com$", sender.lower().split("@")[-1]) and re.search(
+        r"\b(ceo|director|payroll|finance|it support|administrator)\b", lower
+    ):
+        findings.append({"indicator": "Free email provider paired with an authority/finance theme; verify sender", "points": 10})
+        score += 10
+
+    score = min(score, 100)
+    if score >= 50:
+        level = "High risk"
+    elif score >= 25:
+        level = "Medium risk"
+    else:
+        level = "Low indicators found"
+
+    if not findings:
+        findings.append({"indicator": "No configured rule matched. This does not prove the email is safe.", "points": 0})
+
+    return {
+        "module": "Email rule-based screening",
+        "risk_score": score,
+        "risk_level": level,
+        "findings": findings,
+        "urls_found": urls,
+        "model_status": "Rule-based prototype; no trained AI classifier configured",
+        "limitations": "Rules can miss new attacks and can flag legitimate messages. Verify sender and links independently."
+    }
+
+def media_metadata(data: bytes, filename: str, mime: str):
+    info = {
+        "filename": filename,
+        "mime_type": mime or mimetypes.guess_type(filename)[0] or "unknown",
+        "size_bytes": len(data),
+        "size_mib": round(len(data) / (1024 * 1024), 3),
+        "sha256_before": sha256_bytes(data),
+        "integrity_check": "Original upload held in memory; SHA-256 recorded. No file rewriting is performed."
+    }
+    ext = os.path.splitext(filename)[1].lower()
+    try:
+        if ext in [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"]:
+            from PIL import Image
+            image = Image.open(io.BytesIO(data))
+            info["media_type"] = "image"
+            info["image_format"] = image.format
+            info["dimensions"] = f"{image.width} × {image.height}"
+            info["metadata_note"] = "Basic metadata only; metadata or recompression clues cannot establish whether an image is a deepfake."
+        elif ext in [".wav"]:
+            import wave
+            with wave.open(io.BytesIO(data), "rb") as wav:
+                info["media_type"] = "audio"
+                info["duration_seconds"] = round(wav.getnframes() / float(wav.getframerate()), 3)
+                info["sample_rate_hz"] = wav.getframerate()
+                info["channels"] = wav.getnchannels()
+                info["metadata_note"] = "Technical audio properties only; no synthetic-voice model is configured."
+        elif ext in [".mp4", ".mov", ".avi", ".mkv", ".webm"]:
+            info["media_type"] = "video"
+            try:
+                import cv2
+                import tempfile
+                with tempfile.NamedTemporaryFile(suffix=ext, delete=True) as tmp:
+                    tmp.write(data)
+                    tmp.flush()
+                    cap = cv2.VideoCapture(tmp.name)
+                    if cap.isOpened():
+                        fps = cap.get(cv2.CAP_PROP_FPS)
+                        frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+                        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                        info["fps"] = round(fps, 3) if fps else None
+                        info["frame_count"] = int(frames) if frames else None
+                        info["dimensions"] = f"{width} × {height}"
+                        info["duration_seconds"] = round(frames / fps, 3) if fps and frames else None
+                        cap.release()
+                    else:
+                        info["metadata_note"] = "Video metadata could not be read by OpenCV."
+            except Exception:
+                info["metadata_note"] = "Install OpenCV to inspect video properties."
+            info.setdefault("metadata_note", "Technical video properties only; no deepfake video model is configured.")
+        else:
+            info["media_type"] = "other"
+            info["metadata_note"] = "File type not supported by the prototype's metadata inspector."
+    except Exception as exc:
+        info["inspection_error"] = str(exc)
+        info["metadata_note"] = "The file could not be parsed by the available metadata inspector."
+    info["deepfake_result"] = "NOT DETERMINED — no validated deepfake model is configured"
+    info["warning"] = "Do not interpret this technical inspection as a deepfake verdict."
+    return info
+
+def render_report(report):
+    return json.dumps(report, indent=2, ensure_ascii=False)
+
+tab_email, tab_media, tab_about = st.tabs(["📧 Email scanner", "🖼️ Media inspector", "ℹ️ About & testing"])
+
+with tab_email:
+    st.subheader("Scan suspicious email content")
+    st.write("Paste email text and optionally include the sender and subject. Do not paste real passwords or private information.")
+    sender = st.text_input("Sender email address (optional)", key="sender")
+    subject = st.text_input("Email subject (optional)", key="subject")
+    email_text = st.text_area("Email body / message", height=220, placeholder="Paste the email content here...")
+    if st.button("Analyse email", type="primary"):
+        if not email_text.strip() and not subject.strip():
+            st.error("Enter an email subject or body first.")
+        else:
+            start = time.perf_counter()
+            result = scan_email(email_text, sender, subject)
+            elapsed = time.perf_counter() - start
+            report = {
+                "application": "AI Phishing & Deepfake Detector prototype",
+                "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+                "input_type": "email_text",
+                "sender": sender,
+                "subject": subject,
+                "analysis_time_seconds": round(elapsed, 6),
+                "result": result
+            }
+            st.session_state["last_email_report"] = report
+            st.metric("Rule-based risk score", f'{result["risk_score"]}/100')
+            st.subheader(result["risk_level"])
+            st.caption(f'Analysis time: {elapsed:.6f} seconds')
+            st.write("**Indicators found**")
+            for finding in result["findings"]:
+                st.write(f'- {finding["indicator"]} (+{finding["points"]})')
+            if result["urls_found"]:
+                st.write("**URLs found (not opened by this tool)**")
+                for url in result["urls_found"]:
+                    st.code(url)
+            st.info(result["limitations"])
+            st.download_button(
+                "Download email analysis report (JSON)",
+                data=render_report(report),
+                file_name="email_analysis_report.json",
+                mime="application/json"
+            )
+    if "last_email_report" in st.session_state:
+        with st.expander("View most recent email report JSON"):
+            st.code(render_report(st.session_state["last_email_report"]), language="json")
+
+with tab_media:
+    st.subheader("Inspect image, video, or audio file")
+    st.write("This prototype records file properties and integrity information. Deepfake classification requires a validated model.")
+    uploaded = st.file_uploader(
+        "Choose a media file",
+        type=["jpg", "jpeg", "png", "webp", "bmp", "tif", "tiff", "wav", "mp4", "mov", "avi", "mkv", "webm"],
+        help="Prototype limit: Streamlit's default upload limit is commonly 200 MB; actual efficient limits must be measured and reported."
+    )
+    if uploaded is not None:
+        data = uploaded.getvalue()
+        st.write(f"**Selected file:** {uploaded.name} • {len(data)/(1024*1024):.3f} MiB")
+        if st.button("Inspect media", type="primary"):
+            start = time.perf_counter()
+            info = media_metadata(data, uploaded.name, uploaded.type)
+            elapsed = time.perf_counter() - start
+            report = {
+                "application": "AI Phishing & Deepfake Detector prototype",
+                "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+                "input_type": "media_file",
+                "analysis_time_seconds": round(elapsed, 6),
+                "result": info
+            }
+            st.session_state["last_media_report"] = report
+            st.metric("File size", f'{info["size_mib"]} MiB')
+            st.metric("Analysis time", f"{elapsed:.4f} seconds")
+            st.subheader(info["deepfake_result"])
+            st.write("**File details**")
+            st.json(info)
+            st.download_button(
+                "Download media inspection report (JSON)",
+                data=render_report(report),
+                file_name="media_inspection_report.json",
+                mime="application/json"
+            )
+    if "last_media_report" in st.session_state:
+        with st.expander("View most recent media report JSON"):
+            st.code(render_report(st.session_state["last_media_report"]), language="json")
+
+with tab_about:
+    st.subheader("Current prototype scope")
+    st.markdown("""
+- Email: transparent rule-based screening; not yet a trained AI classifier.
+- Images: basic format/dimension inspection.
+- WAV audio: duration, sample rate and channel inspection.
+- Video: technical metadata inspection when OpenCV can read the file.
+- Integrity: SHA-256 hash of the uploaded bytes; the application does not rewrite the source file.
+- Reports: downloadable JSON containing findings and measured analysis time.
+""")
+    st.subheader("Required next development steps")
+    st.markdown("""
+1. Add and document a trained phishing-text model and evaluate it on labelled samples.
+2. Integrate validated image, video and audio deepfake models; record model names, versions, licenses and limitations.
+3. Test with labelled genuine and synthetic/manipulated samples, including false positives and false negatives.
+4. Measure average detection time and maximum successful file size for each media type on the same device.
+5. Compare SHA-256 before and after any processing or export to demonstrate that source files are preserved.
+6. Keep the original file and any derived preview separate; never overwrite the original.
+""")
+    st.subheader("Basic test plan")
+    st.markdown("""
+| Test ID | Test | Expected evidence |
+|---|---|---|
+| T01 | Urgent email asking for a password | Relevant rule appears; score is shown |
+| T02 | Ordinary harmless email | Low score or no indicators; no claim of guaranteed safety |
+| T03 | Valid image upload | Format, dimensions, size and SHA-256 appear |
+| T04 | WAV upload | Duration, sample rate and channels appear |
+| T05 | Supported video upload | Metadata appears if the decoder can read it |
+| T06 | Repeat file inspection | SHA-256 remains identical for the same original bytes |
+| T07 | Large file | Record whether it succeeds, file size and elapsed time |
+""")
+    st.caption("Record real results during testing. Do not report unperformed tests or invented accuracy figures.")
+
+st.divider()
+st.caption("Educational prototype. Do not use it as the sole basis for security decisions.")

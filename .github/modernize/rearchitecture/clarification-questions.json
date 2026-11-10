@@ -1,0 +1,586 @@
+{
+  "schema": "clarification-questions/v1",
+  "generated_at": "2026-11-06T21:02:05Z",
+  "user_input": "please this project a working and a realy testing system not prototype. this is my final project, i dont want a demo i want working system.",
+  "title": "Harden the phishing and deepfake detector",
+  "assessment_snapshot": {
+    "intro": "The workspace contains a Python web application with a local email/media detector and a separate encrypted-chat component:",
+    "bullets": [
+      "Detector UI is Streamlit; chat relay uses Flask-SocketIO and browser Web Crypto.",
+      "Existing tests and sample performance benchmarks are available; reported AI model scores have not been independently validated on a representative labeled dataset.",
+      "The chat is documented as a local classroom demo; public keys are not authenticated and the system has no production identity or deployment configuration.",
+      "The desired outcome is an operational, meaningfully tested final project, but deployment environment and what constitutes acceptable production readiness are not specified."
+    ]
+  },
+  "proposed_outcome": "Incrementally harden the current Python project into a reliably runnable and thoroughly tested system suited to the user's intended environment, preserving existing detector and chat behavior where possible. Add only evidence-supported claims; measure model performance against an agreed labeled dataset before representing AI detection as validated. Define the deployment, security, and acceptance targets before making changes that depend on them.",
+  "scope": [
+    "frontend",
+    "backend",
+    "generic"
+  ],
+  "status": "answered",
+  "questions": [
+    {
+      "id": "F1",
+      "kit": "frontend",
+      "field": "target.framework",
+      "title": "Detector interface framework",
+      "question": "Should the detector keep its current Streamlit interface, or do you require a different frontend framework for the final system?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": "Keep the existing Streamlit interface and harden it",
+      "default": null,
+      "prefilled": true,
+      "prefilled_value": "Keep the existing Streamlit interface and harden it",
+      "answer": {
+        "value": "Keep the existing Streamlit interface and harden it",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Keep the existing Streamlit interface and harden it",
+          "label": "Keep and harden Streamlit"
+        },
+        {
+          "value": "Replace it with a different framework (specify in Other)",
+          "label": "Replace the frontend"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F2",
+      "kit": "frontend",
+      "field": "target.component_library",
+      "title": "UI component approach",
+      "question": "Which component approach should the detector use?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": "Use Streamlit's native widgets and the existing cybersecurity CSS",
+      "default": null,
+      "prefilled": true,
+      "prefilled_value": "Use Streamlit's native widgets and the existing cybersecurity CSS",
+      "answer": {
+        "value": "Use Streamlit's native widgets and the existing cybersecurity CSS",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Use Streamlit's native widgets and the existing cybersecurity CSS",
+          "label": "Streamlit native widgets + existing CSS"
+        },
+        {
+          "value": "Use a different component library (specify in Other)",
+          "label": "Different component library"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F3",
+      "kit": "frontend",
+      "field": "visual.screenshots",
+      "title": "Current interface reference",
+      "question": "The existing interface is available locally at http://127.0.0.1:8501/ and in the project source. Is this the visual baseline, or should the final system follow another design reference?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": null,
+      "default": null,
+      "prefilled": true,
+      "prefilled_value": "Use the current interface at http://127.0.0.1:8501/ as the baseline",
+      "answer": {
+        "value": "Use the current interface at http://127.0.0.1:8501/ as the baseline",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "F4",
+      "kit": "frontend",
+      "field": "visual.design_system",
+      "title": "Visual design baseline",
+      "question": "Should the cybersecurity styling and supplied asset already in this project remain the design baseline?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": "Keep the current project branding, supplied asset, and cybersecurity CSS",
+      "default": "match existing pixel-by-pixel using extracted CSS custom properties",
+      "prefilled": true,
+      "prefilled_value": "Keep the current project branding, supplied asset, and cybersecurity CSS",
+      "answer": {
+        "value": "Keep the current project branding, supplied asset, and cybersecurity CSS",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Keep the current project branding, supplied asset, and cybersecurity CSS",
+          "label": "Keep current branding and CSS"
+        },
+        {
+          "value": "Use a different design system (specify in Other)",
+          "label": "Use another design system"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F5",
+      "kit": "frontend",
+      "field": "compliance.accessibility",
+      "title": "Accessibility target",
+      "question": "What accessibility standard should the interface target?",
+      "importance": "recommended",
+      "impact": 3,
+      "recommended": "WCAG 2.2 AA",
+      "default": "WCAG 2.1 AA",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "WCAG 2.2 AA",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "WCAG 2.1 AA",
+          "label": "WCAG 2.1 AA"
+        },
+        {
+          "value": "WCAG 2.2 AA",
+          "label": "WCAG 2.2 AA"
+        },
+        {
+          "value": "No formal accessibility target",
+          "label": "No formal target"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F6",
+      "kit": "frontend",
+      "field": "compatibility.browsers",
+      "title": "Browser support",
+      "question": "Which browsers must the final system support?",
+      "importance": "recommended",
+      "impact": 2,
+      "recommended": "Current Chrome and Edge on Windows",
+      "default": "modern evergreen (Chrome, Firefox, Safari, Edge — latest 2 major versions)",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Current Chrome and Edge on Windows",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Current Chrome and Edge on Windows",
+          "label": "Current Chrome and Edge on Windows"
+        },
+        {
+          "value": "Modern evergreen browsers (latest two versions)",
+          "label": "Modern evergreen browsers"
+        },
+        {
+          "value": "Other (specify)",
+          "label": "Other browser requirements"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F7",
+      "kit": "frontend",
+      "field": "responsive.breakpoints",
+      "title": "Screen-size support",
+      "question": "Should the interface support mobile and tablet screens, or is desktop-only sufficient?",
+      "importance": "recommended",
+      "impact": 2,
+      "recommended": "Responsive desktop, tablet, and mobile",
+      "default": "mobile-first using existing breakpoints detected from codebase",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Responsive desktop, tablet, and mobile",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Responsive desktop, tablet, and mobile",
+          "label": "Desktop, tablet, and mobile"
+        },
+        {
+          "value": "Desktop-only",
+          "label": "Desktop-only"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F8",
+      "kit": "frontend",
+      "field": "i18n.locales",
+      "title": "Interface languages",
+      "question": "Which interface languages are in scope?",
+      "importance": "optional",
+      "impact": 1,
+      "recommended": null,
+      "default": "preserve current locales; keep existing i18n library if present",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "English only",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "English only",
+          "label": "English only"
+        },
+        {
+          "value": "Other languages (specify)",
+          "label": "Other languages"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F9",
+      "kit": "frontend",
+      "field": "state_mgmt.preference",
+      "title": "Interface state approach",
+      "question": "Do you have a preference for frontend state management?",
+      "importance": "optional",
+      "impact": 1,
+      "recommended": "Keep Streamlit's existing session-state approach",
+      "default": "preserve existing pattern if identifiable; otherwise recommend minimal (component state + server-state library)",
+      "prefilled": true,
+      "prefilled_value": "Keep Streamlit's existing session-state approach",
+      "answer": {
+        "value": "Keep Streamlit's existing session-state approach",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Keep Streamlit's existing session-state approach",
+          "label": "Keep Streamlit session state"
+        },
+        {
+          "value": "Other (specify)",
+          "label": "Other approach"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "F10",
+      "kit": "frontend",
+      "field": "routing.preference",
+      "title": "Interface navigation",
+      "question": "Do you want to keep the current tab navigation, or require another navigation model?",
+      "importance": "optional",
+      "impact": 1,
+      "recommended": "Keep the current Streamlit tabs",
+      "default": "use the de-facto router for the chosen target framework",
+      "prefilled": true,
+      "prefilled_value": "Keep the current Streamlit tabs",
+      "answer": {
+        "value": "Keep the current Streamlit tabs",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Keep the current Streamlit tabs",
+          "label": "Keep current tabs"
+        },
+        {
+          "value": "Other (specify)",
+          "label": "Other navigation"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B1",
+      "kit": "backend",
+      "field": "target.framework",
+      "title": "Backend framework",
+      "question": "Should the current Python Streamlit detector and Flask-SocketIO chat relay remain the backend stack, or is a framework change required?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": "Keep and harden the existing Python Streamlit and Flask-SocketIO applications",
+      "default": null,
+      "prefilled": true,
+      "prefilled_value": "Keep and harden the existing Python Streamlit and Flask-SocketIO applications",
+      "answer": {
+        "value": "Keep and harden the existing Python Streamlit and Flask-SocketIO applications",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Keep and harden the existing Python Streamlit and Flask-SocketIO applications",
+          "label": "Keep and harden the existing Python stack"
+        },
+        {
+          "value": "Replace or consolidate backend frameworks (specify in Other)",
+          "label": "Replace or consolidate frameworks"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B2",
+      "kit": "backend",
+      "field": "api.contract_preservation",
+      "title": "Existing behavior and protocol",
+      "question": "How should existing detector behavior and chat routes/protocol be handled while hardening the system?",
+      "importance": "required",
+      "impact": 4,
+      "recommended": "Preserve current user-visible behavior and chat protocol; add changes compatibly",
+      "default": "must preserve",
+      "prefilled": true,
+      "prefilled_value": "Preserve current user-visible behavior and chat protocol; add changes compatibly",
+      "answer": {
+        "value": "Preserve current user-visible behavior and chat protocol; add changes compatibly",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Preserve current user-visible behavior and chat protocol; add changes compatibly",
+          "label": "Preserve existing behavior and protocol"
+        },
+        {
+          "value": "Version any breaking changes",
+          "label": "Allow versioned changes"
+        },
+        {
+          "value": "Redesign freely; no existing clients need support",
+          "label": "Allow breaking redesign"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B3",
+      "kit": "backend",
+      "field": "data.migration_strategy",
+      "title": "Data storage and migration",
+      "question": "The current project does not appear to use an application database. Should the system remain database-free, or is persistent storage required?",
+      "importance": "required",
+      "impact": 3,
+      "recommended": "No database or migration; keep analysis local and ephemeral",
+      "default": "TBD / assess in research phase",
+      "prefilled": true,
+      "prefilled_value": "No database or migration; keep analysis local and ephemeral",
+      "answer": {
+        "value": "No database or migration; keep analysis local and ephemeral",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "No database or migration; keep analysis local and ephemeral",
+          "label": "Remain database-free and local"
+        },
+        {
+          "value": "Add a database for users, audit records, or settings (specify requirements in Other)",
+          "label": "Add persistent storage"
+        },
+        {
+          "value": "Not sure; assess data needs first",
+          "label": "Assess and recommend"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B4",
+      "kit": "backend",
+      "field": "auth.framework",
+      "title": "User identity and chat keys",
+      "question": "What identity and key-authentication approach is required? This is important because the current chat demo does not authenticate public keys.",
+      "importance": "recommended",
+      "impact": 5,
+      "recommended": null,
+      "default": "preserve existing auth mechanism; detect from codebase",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "Internet-accessible service with managed identity, authenticated keys, and production security review",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Single trusted-machine user; no public network exposure",
+          "label": "Single-user, trusted local machine"
+        },
+        {
+          "value": "Multi-user private network with authenticated user accounts and verified chat identities/keys",
+          "label": "Private network, authenticated users and keys"
+        },
+        {
+          "value": "Internet-accessible service with managed identity, authenticated keys, and production security review",
+          "label": "Internet-accessible, production-grade identity and review"
+        },
+        {
+          "value": "Other (specify)",
+          "label": "Other identity requirements"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "B5",
+      "kit": "backend",
+      "field": "nfr.sla",
+      "title": "Performance and availability targets",
+      "question": "What measurable performance, concurrency, and availability targets should acceptance testing meet? If this is coursework on one PC, state the expected hardware and simultaneous users.",
+      "importance": "recommended",
+      "impact": 4,
+      "recommended": null,
+      "default": "match current production baseline; no regression",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "The system will initially be tested on one Windows 11 computer with lenovo 15 g2 itl thinkbook 11th gen and i5 processor and 8 GB RAM, with testing on the public cloud deployment as well.\n\nThe system should support at least one active user on the local computer and a minimum of five simultaneous users during cloud testing.\n\nProposed performance acceptance targets:\n\n- Email/text analysis: average target of 5 seconds or less.\n- Image analysis: average target of 15 seconds or less.\n- Audio analysis: average target of 30 seconds or less.\n- Video analysis: average target of 60 seconds or less for supported test clips.\n- Report generation: target of 5 seconds or less after analysis.\n- Initial upload limits: 1 MB for text, 10 MB for images, 20 MB for audio and 50 MB for video.\n\nThese are proposed targets, not existing measured results. Actual average processing times, maximum supported file sizes and cloud performance must be measured and reported during testing. The system must show a clear message when a file exceeds its limit or cannot be analysed.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "G1",
+      "kit": "generic",
+      "field": "success.definition",
+      "title": "Definition of done",
+      "question": "Which outcome defines success for this final project?",
+      "importance": "required",
+      "impact": 5,
+      "recommended": "A reliably runnable local coursework system with repeatable automated tests, measured performance and clearly stated limits; no unverified AI-accuracy claims",
+      "default": "feature parity with the current system; all existing user-facing behaviors preserved",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "A reliably runnable local coursework system with repeatable automated tests, measured performance and clearly stated limits; no unverified AI-accuracy claims",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "A reliably runnable local coursework system with repeatable automated tests, measured performance and clearly stated limits; no unverified AI-accuracy claims",
+          "label": "Tested local final-project system with honest evidence"
+        },
+        {
+          "value": "A multi-user deployment for a private organization, with security review and validated AI performance",
+          "label": "Private organizational service with independent validation"
+        },
+        {
+          "value": "An internet-facing production service with operational monitoring, incident response, and independently validated security and AI performance",
+          "label": "Public production service with full operational validation"
+        },
+        {
+          "value": "Other (describe acceptance criteria)",
+          "label": "Other acceptance criteria"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "G2",
+      "kit": "generic",
+      "field": "out_of_scope",
+      "title": "Scope boundaries",
+      "question": "What should remain explicitly out of scope? Include any features you do not need for your final submission.",
+      "importance": "recommended",
+      "impact": 2,
+      "recommended": null,
+      "default": "no explicit exclusions; agent will infer from project structure",
+      "prefilled": false,
+      "prefilled_value": null,
+      "answer": {
+        "value": "The project will focus on an operational AI-generated phishing email and deepfake media detection system and an end-to-end encrypted chat application.\n\nThe following are outside the project scope:\n\n- Building a new operating system or antivirus product.\n- Guaranteeing 100% detection of all phishing attacks or deepfakes.\n- Replacing human security analysts or investigations.\n- Accessing private company systems or customer databases.\n- Collecting real customer passwords, PINs or financial information.\n- Claiming that media is authentic or fake without sufficient evidence.\n- Developing a commercial banking or mobile money transaction platform.\n\nThe system will provide detection results, suspicious indicators, risk levels, confidence or uncertainty information, and recommended security actions. Detection limitations will be clearly explained.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    },
+    {
+      "id": "G3",
+      "kit": "generic",
+      "field": "existing_tests.posture",
+      "title": "Existing test policy",
+      "question": "Should all current tests remain passing as the project is improved?",
+      "importance": "recommended",
+      "impact": 3,
+      "recommended": "Must pass; add tests without replacing working coverage",
+      "default": "must pass",
+      "prefilled": true,
+      "prefilled_value": "Must pass; add tests without replacing working coverage",
+      "answer": {
+        "value": "Must pass; add tests without replacing working coverage",
+        "source": "user"
+      },
+      "depends_on": null,
+      "options": [
+        {
+          "value": "Must pass; add tests without replacing working coverage",
+          "label": "Must pass and retain existing coverage"
+        },
+        {
+          "value": "Can rewrite tests if equivalent or stronger coverage is retained",
+          "label": "Rewrite with equivalent-or-stronger coverage"
+        },
+        {
+          "value": "Replace current suite; it is not a useful baseline",
+          "label": "Replace current tests"
+        }
+      ],
+      "allow_other": true,
+      "type": "single_select"
+    },
+    {
+      "id": "G5",
+      "kit": "generic",
+      "field": "constraints.additional",
+      "title": "Additional constraints",
+      "question": "Please specify where this system will run (your own Windows computer, a private lab/network, or public cloud), who will use it, any security/privacy requirements, and whether you can provide a labeled email/image/audio/video dataset for measuring false positives and false negatives. You may also state final-submission or demonstration requirements.",
+      "importance": "optional",
+      "impact": 5,
+      "recommended": null,
+      "default": "None beyond the decisions listed in this specification.",
+      "prefilled": true,
+      "prefilled_value": "None beyond the decisions listed in this specification.",
+      "answer": {
+        "value": "**Deployment environment**\n\nThe system must run on my Windows 11 computer for development, testing and classroom demonstrations. It must also be deployable and accessible through a public cloud hosting service. The local and cloud versions must maintain consistent functionality.\n\n**Security and privacy requirements**\n\n1. Uploaded emails and media files must be analysed without modifying or corrupting the original files.\n2. Calculate and compare SHA-256 hashes before and after analysis to verify file integrity.\n3. Do not permanently store uploaded private emails, images, audio or videos unless explicitly required and authorised.\n4. Protect application secrets, API keys, passwords and encryption keys.\n5. Implement secure authentication and access controls for the encrypted chat application.\n6. Authenticate and verify public keys to reduce the risk of man-in-the-middle attacks.\n7. Use HTTPS for public cloud communication.\n8. Validate uploaded file types, file sizes and file contents.\n9. Protect the application against malicious uploads, unauthorised access and common web attacks.\n10. Do not expose sensitive information in application logs or detection reports.\n\n**AI detection functionality**\n\nThe detector must support:\n- Phishing email and text analysis.\n- Suspicious URL and domain analysis.\n- Sender identity and impersonation indicators.\n- Copied logo and image similarity checks.\n- Deepfake image analysis.\n- Deepfake video analysis.\n- Synthetic or manipulated audio analysis.\n\nThe system must provide an analysis result, risk level, suspicious indicators, processing time and recommended next steps. It must distinguish between a confirmed finding, a suspicious result and an inconclusive result. It must not claim that an unvalidated model can detect all deepfakes.\n\n**Testing and performance evidence**\n\nTesting must include different examples of legitimate and malicious emails, images, audio recordings and videos. Use appropriately licensed public datasets and controlled test samples with known labels. Record true positives, true negatives, false positives and false negatives. Calculate precision, recall, F1-score and accuracy where applicable.\n\nMeasure the maximum supported file size, average detection time, report generation time and performance under multiple users. Include screenshots and test results in the final report.\n\n**Dataset requirements**\n\nUse publicly available, appropriately licensed datasets for phishing emails and deepfake image, video and audio samples. Where suitable labelled datasets are unavailable, prepare controlled test samples and document their source and labels. Do not use private customer information.\n\n**End-to-end encrypted chat application**\n\nThe chat application must support user registration and authentication, secure key generation and verification, encrypted message transmission, message decryption by the intended recipient, and protection against unauthorised access. Demonstrate that the server cannot read message plaintext. Document the encryption approach and its limitations.\n\n**Final submission and demonstration**\n\nThe final project must include working source code, installation instructions, requirements file, test evidence, screenshots, deployment link, user guide and technical documentation. Demonstrate all supported media types, detection reports, file-integrity verification and encrypted messaging. Include lessons learnt, known limitations and recommendations for future improvement.",
+        "source": "user"
+      },
+      "depends_on": null,
+      "type": "text"
+    }
+  ]
+}

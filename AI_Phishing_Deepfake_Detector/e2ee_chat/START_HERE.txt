@@ -1,0 +1,33 @@
+LOCAL END-TO-END ENCRYPTED CHAT
+===============================
+
+1. In PowerShell, run:
+   .\start_server.bat
+2. Open http://127.0.0.1:5000/ in two browser profiles or windows.
+3. Create a different local account in each profile. Use a password with at
+   least 12 characters and click "Load or Generate Local Keys".
+4. Select the other account. Compare the complete fingerprint in person or by
+   phone against that person's "Your public-key fingerprint", then confirm it
+   in the UI. Both participants should verify the other's fingerprint.
+5. Send a message. Expand "Encrypted payload sent through the relay" in the
+   sender's message bubble to show the ciphertext envelope; the recipient sees
+   the decrypted text.
+6. Send files up to 10 MiB. The sender and recipient must each verify the
+   other's fingerprint before sending.
+
+The local server stores scrypt password hashes and public keys in SQLite. Private
+encryption and signing keys stay in IndexedDB in the browser profile. Clearing
+browser data loses account access; there is no password reset or key recovery.
+
+Run server tests with:
+   python -m unittest discover -s e2ee_chat\tests -p test_server.py
+
+Run browser crypto tests with:
+   node tests\test_chat_crypto.js
+
+The tests demonstrate that only the intended recipient can decrypt a message,
+the sender signature verifies, changed/unverified peer keys block sending,
+and unauthenticated clients cannot enumerate users or send messages.
+
+The service binds to loopback and uses local HTTP. Do not expose it to a network
+or use it for sensitive real-world communication.
