@@ -1,4 +1,4 @@
-﻿# Enhanced AI Phishing & Deepfake Detector
+# Enhanced AI Phishing & Deepfake Detector
 # Complete implementation with all required features
 
 import streamlit as st
@@ -28,7 +28,19 @@ from utils.input_safety import (
 )
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-PORTAL_CHAT_URL = os.environ.get('PORTAL_CHAT_URL', 'http://127.0.0.1:5001')
+
+
+def app_setting(name: str, default: str) -> str:
+    if name in os.environ:
+        return os.environ[name]
+    try:
+        return str(st.secrets.get(name, default))
+    except st.errors.StreamlitSecretNotFoundError:
+        return default
+
+
+PORTAL_CHAT_URL = app_setting('PORTAL_CHAT_URL', 'http://127.0.0.1:5001').rstrip('/')
+PUBLIC_DEPLOYMENT = app_setting('PUBLIC_DEPLOYMENT', 'false').strip().lower() == 'true'
 PORTAL_SESSION_API = f'{PORTAL_CHAT_URL}/api/session'
 
 
@@ -47,11 +59,11 @@ def portal_session_request(action: str, token: str):
             return None
         raise RuntimeError(f'The sign-in service returned HTTP {error.code}.') from error
     except (URLError, TimeoutError) as error:
-        raise RuntimeError('The local sign-in service is unavailable.') from error
+        raise RuntimeError('The sign-in service is unavailable.') from error
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise RuntimeError('The local sign-in service returned an invalid response.') from error
+        raise RuntimeError('The sign-in service returned an invalid response.') from error
     if not isinstance(result, dict):
-        raise RuntimeError('The local sign-in service returned an invalid response.')
+        raise RuntimeError('The sign-in service returned an invalid response.')
     return result
 
 
@@ -637,6 +649,20 @@ def is_loopback_bind_address(address: str | None) -> bool:
     """Only allow addresses that resolve to the local machine."""
     return str(address or '').strip().lower() in {'127.0.0.1', 'localhost', '::1'}
 
+
+def is_https_url(value: str) -> bool:
+    try:
+        parsed = urlparse(value)
+        return (
+            parsed.scheme == 'https'
+            and bool(parsed.hostname)
+            and parsed.username is None
+            and parsed.password is None
+        )
+    except ValueError:
+        return False
+
+
 def clear_media_report():
     st.session_state.pop('media_report', None)
     st.session_state.pop('run_media_models', None)
@@ -715,16 +741,22 @@ def render_project_evidence() -> None:
 
     st.markdown('#### End-to-end encrypted chat')
     st.markdown(
-        'The local chat uses SQLite-backed password accounts, browser-persisted non-exportable RSA-OAEP and '
+        'The chat uses SQLite-backed password accounts, browser-persisted non-exportable RSA-OAEP and '
         'ECDSA keys, out-of-band fingerprint pinning, and signed AES-256-GCM message/file envelopes. '
         'Tests cover account authentication, account-key binding, signatures, and tamper rejection.'
     )
-    st.warning(
-        'Local-only prototype: compare each peer fingerprint over an independent trusted channel. There is '
-        'no recovery, forward secrecy, HTTPS, metadata protection, or safety if a compromised server changes '
-        'client code. Public-cloud deployment is not enabled. Start '
-        '`e2ee_chat/start_server.bat` before opening the local chat.'
-    )
+    if PUBLIC_DEPLOYMENT:
+        st.warning(
+            'Hosted classroom prototype: compare each peer fingerprint over an independent trusted channel. '
+            'Account records on the free host are ephemeral. There is no recovery, forward secrecy, or metadata '
+            'protection, and a compromised server could change the served client code.'
+        )
+    else:
+        st.warning(
+            'Local-only prototype: compare each peer fingerprint over an independent trusted channel. There is '
+            'no recovery, forward secrecy, HTTPS, metadata protection, or safety if a compromised server changes '
+            'client code. Start `e2ee_chat/start_server.bat` before opening the local chat.'
+        )
     st.link_button('Return to app choices and chat', PORTAL_CHAT_URL)
 
     st.markdown('#### Lessons learnt | Part I and Part II')
@@ -856,13 +888,13 @@ def render_file_workspace(
 ) -> None:
     st.subheader(title)
     uploaded_file = st.file_uploader(
-        'Select a file for local inspection',
+        'Select a file for inspection',
         type=file_types,
         key=uploader_key,
         on_change=clear_media_report,
     )
     st.caption(
-        'Local-only limits: text 1 MiB, images 10 MiB, audio 20 MiB, and supported video 50 MiB. '
+        'Upload limits: text 1 MiB, images 10 MiB, audio 20 MiB, and supported video 50 MiB. '
         'Unsupported, oversized, or invalid content is rejected before analysis.'
     )
     extension = (
@@ -923,7 +955,7 @@ def render_file_workspace(
     ) and uploaded_file is not None:
         try:
             validate_upload_size(uploaded_file.name, uploaded_file.size)
-            with st.spinner('Inspecting the file locally...'):
+            with st.spinner('Inspecting the file...'):
                 media_report = media_metadata(
                     uploaded_file.getvalue(),
                     uploaded_file.name,
@@ -1068,16 +1100,23 @@ def render_file_workspace(
 
 
 def run_app():
-    if not is_loopback_bind_address(st.get_option('server.address')):
+    if not PUBLIC_DEPLOYMENT and not is_loopback_bind_address(st.get_option('server.address')):
         st.error(
             'Local-only mode is required. Set Streamlit server.address to 127.0.0.1 '
             'and restart; non-loopback listeners are not supported.'
         )
         st.stop()
+    if PUBLIC_DEPLOYMENT and not is_https_url(PORTAL_CHAT_URL):
+        st.error('Public deployment requires PORTAL_CHAT_URL to use HTTPS.')
+        st.stop()
     st.set_page_config(page_title='AI Phishing & Deepfake Detector', page_icon='🔍', layout='wide')
     session_token = st.query_params.get('session')
     if not isinstance(session_token, str) or not session_token:
-        st.error('Sign in through the Local-First Threat Analysis app before opening the detector.')
+        st.error(
+            'Sign in through the hosted Threat Analysis app before opening the detector.'
+            if PUBLIC_DEPLOYMENT else
+            'Sign in through the Local-First Threat Analysis app before opening the detector.'
+        )
         st.link_button('Go to sign in', PORTAL_CHAT_URL)
         st.stop()
     try:
@@ -1094,7 +1133,8 @@ def run_app():
     with open(os.path.join(APP_ROOT, 'static', 'cybersecurity.css'), encoding='utf-8') as stylesheet:
         st.markdown(f'<style>{stylesheet.read()}</style>', unsafe_allow_html=True)
     st.sidebar.markdown(
-        '<div class="dashboard-brand"><span>LOCAL-FIRST</span><strong>THREAT ANALYSIS</strong></div>',
+        f'<div class="dashboard-brand"><span>{"HOSTED" if PUBLIC_DEPLOYMENT else "LOCAL-FIRST"}</span>'
+        '<strong>THREAT ANALYSIS</strong></div>',
         unsafe_allow_html=True,
     )
     st.sidebar.caption('WORKSPACE')
@@ -1116,9 +1156,12 @@ def run_app():
             on_change=clear_media_report,
         )
     st.sidebar.divider()
-    st.sidebar.markdown('**LOCAL SESSION**')
+    st.sidebar.markdown('**SESSION**' if PUBLIC_DEPLOYMENT else '**LOCAL SESSION**')
     st.sidebar.caption(f"Signed in as {portal_session['username']}")
-    st.sidebar.caption('Analysis runs on this device.')
+    st.sidebar.caption(
+        'Analysis runs on the detector service.' if PUBLIC_DEPLOYMENT
+        else 'Analysis runs on this device.'
+    )
     st.sidebar.link_button(
         'App choices and chat',
         PORTAL_CHAT_URL,
@@ -1138,9 +1181,9 @@ def run_app():
             )
 
     st.markdown(
-        '<div class="dashboard-eyebrow">SECURITY WORKSPACE / LOCAL ANALYSIS</div>'
+        '<div class="dashboard-eyebrow">SECURITY WORKSPACE / ANALYSIS</div>'
         '<h1 class="dashboard-title">Phishing &amp; deepfake analysis</h1>'
-        '<p class="dashboard-description">Review suspicious email, media, and files in one local workspace.</p>',
+        '<p class="dashboard-description">Review suspicious email, media, and files in one analysis workspace.</p>',
         unsafe_allow_html=True,
     )
     if section == 'Overview':
@@ -1157,7 +1200,11 @@ def run_app():
         status_columns = st.columns(3)
         status_columns[0].metric('Email screening', latest_email)
         status_columns[1].metric('Media & files', latest_file)
-        status_columns[2].metric('Workspace', 'Local', 'Session verified')
+        status_columns[2].metric(
+            'Workspace',
+            'Hosted' if PUBLIC_DEPLOYMENT else 'Local',
+            'Session verified',
+        )
         st.markdown('### Analysis services')
         service_columns = st.columns(2)
         with service_columns[0]:
@@ -1211,7 +1258,8 @@ def run_app():
         )
     elif section == 'Chat':
         st.markdown(
-            '<div class="service-card"><span class="service-state">LOCAL</span>'
+            f'<div class="service-card"><span class="service-state">'
+            f'{"HOSTED" if PUBLIC_DEPLOYMENT else "LOCAL"}</span>'
             '<h3>End-to-end encrypted chat</h3>'
             '<p>Continue to your signed-in chat portal to open encrypted conversations.</p></div>',
             unsafe_allow_html=True,
